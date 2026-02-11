@@ -1,0 +1,87 @@
+<section class="feature">
+  <header class="feature__header">
+    <div class="feature__header-title">
+      <h1>{{ title }}</h1>
+      <p>Review past games and outcomes.</p>
+    </div>
+  </header>
+
+  <div class="feature__body">
+    @if (errorMessage()) {
+      <div class="feature__error">{{ errorMessage() }}</div>
+    }
+
+    @if (isLoading()) {
+      <div>Loading match history...</div>
+    }
+
+    @if (!isLoading() && sortedMatches().length === 0) {
+      <p>No matches recorded yet.</p>
+    }
+
+    @if (sortedMatches().length > 0) {
+      <div class="match-table">
+        <div class="match-table__row match-table__row--header">
+          <div>Player ID</div>
+          <div>Deck</div>
+          <div>Winner</div>
+          <div>Format</div>
+          <div>Player Win</div>
+          <div>Result</div>
+          <div>Played At</div>
+          <div>Player</div>
+          <div>Opponent 1</div>
+          <div>Opponent 2</div>
+          <div>Opponent 3</div>
+          <div>Actions</div>
+        </div>
+
+        @for (match of sortedMatches(); track $index) {
+          <div class="match-table__row">
+            <div class="match-table__cell">{{ match.playerID ?? '—' }}</div>
+            <div class="match-table__cell">{{ match.deckName ?? '—' }}</div>
+            <div class="match-table__cell">{{ match.winnerName ?? '—' }}</div>
+            <div class="match-table__cell">{{ match.format ?? '—' }}</div>
+            <div class="match-table__cell">{{ match.playerWin ? 'Yes' : 'No' }}</div>
+            <div class="match-table__cell">{{ match.result ?? '—' }}</div>
+            <div class="match-table__cell">{{ formatDate(match.playedAt) }}</div>
+            <div class="match-table__cell">
+              <div class="match-table__stack">
+                <strong>{{ getPrimaryDisplay(match).player }}</strong>
+                <span>{{ getPrimaryDisplay(match).deck }}</span>
+              </div>
+            </div>
+            <div class="match-table__cell">
+              <div class="match-table__stack">
+                <strong>{{ getOpponentDisplay(match, 1).player }}</strong>
+                <span>{{ getOpponentDisplay(match, 1).deck }}</span>
+              </div>
+            </div>
+            <div class="match-table__cell">
+              <div class="match-table__stack">
+                <strong>{{ getOpponentDisplay(match, 2).player }}</strong>
+                <span>{{ getOpponentDisplay(match, 2).deck }}</span>
+              </div>
+            </div>
+            <div class="match-table__cell">
+              <div class="match-table__stack">
+                <strong>{{ getOpponentDisplay(match, 3).player }}</strong>
+                <span>{{ getOpponentDisplay(match, 3).deck }}</span>
+              </div>
+            </div>
+            <div class="match-table__cell">
+              <button
+                type="button"
+                class="feature__delete-btn"
+                [disabled]="deletingMatchKey() === getMatchKeyString(match)"
+                (click)="deleteMatch(match)"
+              >
+                {{ deletingMatchKey() === getMatchKeyString(match) ? 'Deleting...' : 'Delete' }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>

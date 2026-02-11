@@ -1,0 +1,125 @@
+<section class="feature">
+  <header class="feature__header">
+    <div class="feature__header-title">
+      <h1>{{ title }}</h1>
+      <p>Manage player profiles and participation.</p>
+    </div>
+    <div class="feature__header-actions">
+      @if (showDeleteSelect()) {
+        <select
+          class="feature__select"
+          [value]="selectedDeleteKey()"
+          (change)="selectedDeleteKey.set($any($event.target).value)"
+        >
+          <option value="">Select player</option>
+          @for (player of players(); track $index) {
+            <option [value]="getPlayerDeleteKeyString(player)">
+              {{ getPlayerName(player) }}
+            </option>
+          }
+        </select>
+      }
+      <div class="feature__header-buttons">
+        <button
+          type="button"
+          class="feature__delete-btn"
+          [disabled]="isLoadingPlayers() || isCreatingPlayer() || (showDeleteSelect() && !selectedDeleteKey())"
+          (click)="handleDeleteClick()"
+        >
+          {{ showDeleteSelect() ? 'Confirm Delete' : 'Delete Player' }}
+        </button>
+        <button type="button" class="feature__add-btn" (click)="toggleAddPlayer()">
+          {{ showAddForm() ? 'Close' : 'Add Player' }}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="feature__body">
+    <div class="feature__filters">
+      <span class="feature__filters-label">Show</span>
+      <div class="feature__filters-group">
+        @for (option of formatOptions; track $index) {
+          <button
+            type="button"
+            class="feature__filter-btn"
+            [class.feature__filter-btn--active]="formatFilter() === option"
+            (click)="formatFilter.set(option)"
+          >
+            {{ getFormatLabel(option) }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (playerErrorMessage()) {
+      <div class="feature__error">{{ playerErrorMessage() }}</div>
+    }
+
+    @if (showAddForm()) {
+      <div class="add-player">
+        <h3>Add Player</h3>
+        <div class="add-player__grid">
+          <label class="add-player__label" for="player-name">Player name</label>
+          <input
+            id="player-name"
+            class="add-player__input"
+            placeholder="Player name"
+            [value]="newPlayerName()"
+            (input)="newPlayerName.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="add-player__actions">
+          <button
+            type="button"
+            class="feature__add-btn"
+            [disabled]="isCreatingPlayer()"
+            (click)="submitPlayer()"
+          >
+            {{ isCreatingPlayer() ? 'Saving...' : 'Create Player' }}
+          </button>
+        </div>
+
+        @if (createPlayerErrorMessage()) {
+          <div class="feature__error">{{ createPlayerErrorMessage() }}</div>
+        }
+
+        @if (createPlayerSuccessMessage()) {
+          <div class="add-player__success">{{ createPlayerSuccessMessage() }}</div>
+        }
+      </div>
+    }
+
+    @if (isLoadingPlayers()) {
+      <div>Loading players...</div>
+    }
+
+    @if (!isLoadingPlayers() && filteredPlayers().length === 0) {
+      <p>No players found.</p>
+    }
+
+    @if (filteredPlayers().length > 0) {
+      <div class="players-table">
+        <div class="players-table__row players-table__row--header">
+          <div>Name</div>
+          <div>Wins</div>
+          <div>Losses</div>
+          <div>Win %</div>
+          <div>Favorite Deck</div>
+        </div>
+
+        @for (player of filteredPlayers(); track $index) {
+          <div class="players-table__row">
+            <div class="players-table__cell">{{ getPlayerName(player) }}</div>
+            <div class="players-table__cell players-table__stat">{{ getWins(player) }}</div>
+            <div class="players-table__cell players-table__stat">{{ getLosses(player) }}</div>
+            <div class="players-table__cell players-table__stat">{{ getWinPercentage(player) }}</div>
+            <div class="players-table__cell players-table__stat">{{ getFavoriteDeck(player) }}</div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+</section>

@@ -1,0 +1,123 @@
+<section class="feature">
+  <header class="feature__header">
+    <div class="feature__header-title">
+      <h1>{{ title }}</h1>
+      <p>Manage your deck list, counts, and highlights.</p>
+    </div>
+    <div class="feature__header-actions">
+      @if (showDeleteSelect()) {
+        <select
+          class="feature__select"
+          [value]="selectedDeleteKey()"
+          (change)="selectedDeleteKey.set($any($event.target).value)"
+        >
+          <option value="">Select deck</option>
+          @for (deck of decks(); track $index) {
+            <option [value]="getDeckDeleteKeyString(deck)">
+              {{ getDeckName(deck) }}
+            </option>
+          }
+        </select>
+      }
+      <div class="feature__header-buttons">
+        <button
+          type="button"
+          class="feature__delete-btn"
+          [disabled]="isLoadingDecks() || isCreatingDeck() || (showDeleteSelect() && !selectedDeleteKey())"
+          (click)="handleDeleteClick()"
+        >
+          {{ showDeleteSelect() ? 'Confirm Delete' : 'Delete Deck' }}
+        </button>
+        <button type="button" class="feature__add-btn" (click)="toggleAddDeck()">
+          {{ showAddForm() ? 'Close' : 'Add Deck' }}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="feature__body">
+    <div class="feature__filters">
+      <span class="feature__filters-label">Show</span>
+      <div class="feature__filters-group">
+        @for (option of formatOptions; track $index) {
+          <button
+            type="button"
+            class="feature__filter-btn"
+            [class.feature__filter-btn--active]="formatFilter() === option"
+            (click)="formatFilter.set(option)"
+          >
+            {{ getFormatLabel(option) }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (deckErrorMessage()) {
+      <div class="feature__error">{{ deckErrorMessage() }}</div>
+    }
+
+    @if (showAddForm()) {
+      <div class="add-deck">
+        <h3>Add Deck</h3>
+        <div class="add-deck__grid">
+          <label class="add-deck__label" for="deck-name">Deck name</label>
+          <input
+            id="deck-name"
+            class="add-deck__input"
+            placeholder="Deck name"
+            [value]="newDeckName()"
+            (input)="newDeckName.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="add-deck__actions">
+          <button
+            type="button"
+            class="feature__add-btn"
+            [disabled]="isCreatingDeck()"
+            (click)="submitDeck()"
+          >
+            {{ isCreatingDeck() ? 'Saving...' : 'Create Deck' }}
+          </button>
+        </div>
+
+        @if (createDeckErrorMessage()) {
+          <div class="feature__error">{{ createDeckErrorMessage() }}</div>
+        }
+
+        @if (createDeckSuccessMessage()) {
+          <div class="add-deck__success">{{ createDeckSuccessMessage() }}</div>
+        }
+      </div>
+    }
+
+    @if (isLoadingDecks()) {
+      <div>Loading decks...</div>
+    }
+
+    @if (!isLoadingDecks() && filteredDecks().length === 0) {
+      <p>No decks found.</p>
+    }
+
+    @if (filteredDecks().length > 0) {
+      <div class="decks-table">
+        <div class="decks-table__row decks-table__row--header">
+          <div>Name</div>
+          <div>Wins</div>
+          <div>Losses</div>
+          <div>Win %</div>
+        </div>
+
+        @for (deck of filteredDecks(); track $index) {
+          <div class="decks-table__row">
+            <div class="decks-table__cell">{{ getDeckName(deck) }}</div>
+            <div class="decks-table__cell decks-table__stat">{{ getWins(deck) }}</div>
+            <div class="decks-table__cell decks-table__stat">{{ getLosses(deck) }}</div>
+            <div class="decks-table__cell decks-table__stat">{{ getWinPercentage(deck) }}</div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+</section>

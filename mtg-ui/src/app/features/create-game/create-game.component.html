@@ -1,0 +1,147 @@
+<section class="feature">
+  <header class="feature__header">
+    <h1>{{ title }}</h1>
+    <p>Choose four players, assign decks, and set win/loss/tie outcomes.</p>
+  </header>
+
+  <div class="feature__body">
+    <div class="feature__controls">
+      <label class="feature__label" for="game-format">Game Type</label>
+      <select
+        id="game-format"
+        class="feature__select"
+        [value]="gameFormat()"
+        (change)="gameFormat.set($any($event.target).value)"
+      >
+        <option value="casual">Casual</option>
+        <option value="cedh">cEDH</option>
+      </select>
+    </div>
+
+    @if (playerErrorMessage() || deckErrorMessage()) {
+      <div class="feature__error">
+        {{ playerErrorMessage() ?? deckErrorMessage() }}
+      </div>
+    }
+
+    @if (isLoadingPlayers() || isLoadingDecks()) {
+      <div>Loading players and decks...</div>
+    }
+
+    @if (!isLoadingPlayers() && !isLoadingDecks()) {
+      <div class="create-game__grid">
+        @for (slot of slots(); track $index) {
+          <div class="create-game__slot">
+            <h3>Seat {{ $index + 1 }}</h3>
+
+            <label class="create-game__label" for="player-{{ $index }}">Player</label>
+            <select
+              class="create-game__select"
+              id="player-{{ $index }}"
+              [value]="slot.playerIndex ?? ''"
+              (change)="updatePlayer($index, $any($event.target).value)"
+            >
+              <option value="">Select player</option>
+              @for (player of players(); track $index) {
+                <option [value]="$index">
+                  {{ playerLabel(player, 'Player ' + ($index + 1)) }}
+                </option>
+              }
+            </select>
+
+            <label class="create-game__label" for="deck-{{ $index }}">Deck</label>
+            <select
+              class="create-game__select"
+              id="deck-{{ $index }}"
+              [value]="slot.deckIndex ?? ''"
+              (change)="updateDeck($index, $any($event.target).value)"
+            >
+              <option value="">Select deck</option>
+              @for (deck of decks(); track $index) {
+                <option [value]="$index">
+                  {{ deckLabel(deck, 'Deck ' + ($index + 1)) }}
+                </option>
+              }
+            </select>
+
+            <label class="create-game__label" for="result-{{ $index }}">Result</label>
+            <select
+              class="create-game__select"
+              id="result-{{ $index }}"
+              [value]="slot.result"
+              (change)="updateResult($index, $any($event.target).value)"
+            >
+              <option value="">Choose result</option>
+              <option value="win">Win</option>
+              <option value="loss">Loss</option>
+              <option value="tie">Tie</option>
+            </select>
+          </div>
+        }
+      </div>
+
+      @if (duplicatePlayers()) {
+        <div class="feature__error">Each player must be unique.</div>
+      }
+
+      <div class="create-game__actions">
+        <button
+          class="create-game__button"
+          [disabled]="!canCreate() || isSubmitting()"
+          (click)="createGame()"
+        >
+          {{ isSubmitting() ? 'Saving...' : 'Create Game' }}
+        </button>
+        <p class="create-game__hint">(Saves a match record to your API.)</p>
+      </div>
+
+      @if (submitErrorMessage()) {
+        <div class="feature__error">{{ submitErrorMessage() }}</div>
+      }
+
+      @if (submitSuccessMessage()) {
+        <div class="create-game__success">{{ submitSuccessMessage() }}</div>
+      }
+
+      @if (canCreate()) {
+        <div class="create-game__summary">
+          <div class="create-game__summary-header">
+            <h3>Preview</h3>
+            <span class="create-game__pill">{{ gameFormat() === 'cedh' ? 'cEDH' : 'Casual' }}</span>
+          </div>
+
+          <div class="create-game__summary-grid">
+            @for (slot of slots(); track $index) {
+              <div class="create-game__summary-card">
+                <div class="create-game__summary-top">
+                  <span class="create-game__seat">Seat {{ $index + 1 }}</span>
+                  <span
+                    class="create-game__badge"
+                    [class.create-game__badge--win]="slot.result === 'win'"
+                    [class.create-game__badge--loss]="slot.result === 'loss'"
+                    [class.create-game__badge--tie]="slot.result === 'tie'"
+                  >
+                    {{ slot.result || '—' }}
+                  </span>
+                </div>
+
+                <div class="create-game__summary-row">
+                  <span>Player</span>
+                  <strong>
+                    {{ slot.playerIndex !== null ? playerLabel(players()[slot.playerIndex], 'Player') : '—' }}
+                  </strong>
+                </div>
+                <div class="create-game__summary-row">
+                  <span>Deck</span>
+                  <strong>
+                    {{ slot.deckIndex !== null ? deckLabel(decks()[slot.deckIndex], 'Deck') : '—' }}
+                  </strong>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</section>

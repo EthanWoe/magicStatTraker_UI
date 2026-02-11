@@ -1,37 +1,33 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './services/auth.guard';
 
 export const routes: Routes = [
   {
-    path: 'login',
+    path: 'decks',
     loadComponent: () =>
-      import('./features/login/login.component')
-        .then(m => m.LoginComponent)
+      import('./features/decks/decks.component')
+        .then(m => m.DecksComponent)
   },
 
   {
-    path: 'cards',
-    canActivate: [authGuard],
+    path: 'players',
     loadComponent: () =>
-      import('./features/card/card-list/card-list.component')
-        .then(m => m.CardListComponent)
+      import('./features/players/players.component')
+        .then(m => m.PlayersComponent)
   },
 
   {
-    path: 'workers',
-    canActivate: [authGuard],
+    path: 'create-game',
     loadComponent: () =>
-      import('./features/worker/worker-id/worker-id')
-        .then(m => m.WorkerID)
+      import('./features/create-game/create-game.component')
+        .then(m => m.CreateGameComponent)
   },
 
   {
-    path: 'orders',
-    canActivate: [authGuard],
+    path: 'match-history',
     loadComponent: () =>
-      import('./features/order-id/order-id/order-id')
-        .then(m => m.OrderIdComponent)
+      import('./features/match-history/match-history.component')
+        .then(m => m.MatchHistoryComponent)
   },
 
-  { path: '', pathMatch: 'full', redirectTo: 'login' }
+  { path: '', pathMatch: 'full', redirectTo: 'decks' }
 ];
